@@ -46,15 +46,17 @@ section {
 
 article {
   width: 85%;
-  height: 200px;
+  height: 500px;
 }
 
 aside {
   width: 10%;
-  height: 400px;
+  height: 500px;
   background-color: #3d3d3d;
   margin: 15px;
   float: right;
+  color: white;
+  padding: 5px;
 }
 
 form input {
