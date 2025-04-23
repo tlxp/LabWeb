@@ -1,4 +1,4 @@
-const fs = require('fs');
+/*const fs = require('fs');
 const path = require('path');
 
 const ficheiro = path.join(__dirname, '../shared/ficheiro_notas.txt');
@@ -13,62 +13,79 @@ try {
 
 function gravarFicheiro() {
   fs.writeFileSync(ficheiro, JSON.stringify(minhas_notas, null, 2));
+}*/
+
+const { MongoClient, ObjectId } = require("mongodb");
+const uri = "mongodb+srv://Tia:UH3yx6d1YGm6ujPc@node3.eoonlxq.mongodb.net/";
+const db = "notasDB";
+const collection = "notas";
+
+async function ligarMongo() {
+  const client = new MongoClient(uri);
+  await client.connect();
+  return client.db(db).collection(collection);
 }
 
 module.exports = (app) => {
-  // GET - todas as notas
-  app.get('/', (req, res) => {
-    res.status(200).json(minhas_notas);
+  // GET - listar todas as notas
+  app.get("/", async (req, res) => {
+    const collection = await ligarMongo();
+    const notas = await collection.find().toArray();
+    res.status(200).json(notas);
   });
 
-  // GET - nota por código
-  app.get('/:cod', (req, res) => {
-    const nota = minhas_notas.find(n => n.cod === req.params.cod);
-    if (!nota) return res.status(404).json({ erro: 'Nota não encontrada' });
-    res.status(200).json(nota);
-  });
-
-  // POST - adicionar nova nota
-  app.post('/', (req, res) => {
-    const { cod, nome, prof, nota } = req.body;
-    if (!cod || !nome || !prof || isNaN(nota)) {
-      return res.status(400).json({ erro: 'Dados inválidos' });
+  // POST - adicionar nota
+  app.post("/", async (req, res) => {
+    const novaNota = req.body;
+    if (
+      !novaNota.cod ||
+      !novaNota.nome ||
+      !novaNota.prof ||
+      isNaN(novaNota.nota)
+    ) {
+      return res.status(400).json({ erro: "Dados inválidos" });
     }
-    const novaNota = { cod, nome, prof, nota: Number(nota) };
-    minhas_notas.push(novaNota);
-    gravarFicheiro();
-    res.status(201).json({ mensagem: 'Nota adicionada', nota: novaNota });
+
+    const collection = await ligarMongo();
+    await collection.insertOne(novaNota);
+    res.status(200).json({ mensagem: "Nota inserida com sucesso" });
   });
 
-  // PATCH - atualizar nota por código
-  app.patch('/:cod', (req, res) => {
+  // PATCH - atualizar nota pelo código
+  app.patch("/:cod", async (req, res) => {
     const { cod } = req.params;
-    const { nome, prof, nota } = req.body;
-    const index = minhas_notas.findIndex(n => n.cod === cod);
-    if (index === -1) return res.status(404).json({ erro: 'Nota não encontrada' });
+    const dadosAtualizados = req.body;
 
-    if (nome) minhas_notas[index].nome = nome;
-    if (prof) minhas_notas[index].prof = prof;
-    if (!isNaN(nota)) minhas_notas[index].nota = Number(nota);
+    const collection = await ligarMongo();
+    const resultado = await collection.updateOne(
+      { cod },
+      { $set: dadosAtualizados }
+    );
 
-    gravarFicheiro();
-    res.status(200).json({ mensagem: 'Nota atualizada', nota: minhas_notas[index] });
+    if (resultado.matchedCount === 0) {
+      return res.status(404).json({ erro: "Nota não encontrada" });
+    }
+
+    res.status(200).json({ mensagem: "Nota atualizada com sucesso" });
   });
 
-  // DELETE - apagar nota por código
-  app.delete('/:cod', (req, res) => {
-    const index = minhas_notas.findIndex(n => n.cod === req.params.cod);
-    if (index === -1) return res.status(404).json({ erro: 'Nota não encontrada' });
+  // DELETE - apagar nota pelo código
+  app.delete("/:cod", async (req, res) => {
+    const { cod } = req.params;
+    const collection = await ligarMongo();
+    const resultado = await collection.deleteOne({ cod });
 
-    const removida = minhas_notas.splice(index, 1);
-    gravarFicheiro();
-    res.status(200).json({ mensagem: 'Nota removida', nota: removida[0] });
+    if (resultado.deletedCount === 0) {
+      return res.status(404).json({ erro: "Nota não encontrada" });
+    }
+
+    res.status(200).json({ mensagem: "Nota removida com sucesso" });
   });
 
   // DELETE - apagar todas as notas
-  app.delete('/', (req, res) => {
-    minhas_notas = [];
-    gravarFicheiro();
-    res.status(200).json({ mensagem: 'Todas as notas foram apagadas' });
+  app.delete("/", async (req, res) => {
+    const collection = await ligarMongo();
+    await collection.deleteMany({});
+    res.status(200).json({ mensagem: "Todas as notas foram removidas" });
   });
 };
