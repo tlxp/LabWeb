@@ -8,7 +8,7 @@ const app = express();
 const PORT = 3000;
 
 // String de conexão com o MongoDB Atlas
-const DB_URI = 'mongodb+srv://diogo:diogosara17@cluster0.ofm7cao.mongodb.net/notasDB?retryWrites=true&w=majority';
+const DB_URI = 'mongodb+srv://diogo:***********@cluster0.ofm7cao.mongodb.net/notasDB?retryWrites=true&w=majority';
 
 // Conectar ao MongoDB
 mongoose.connect(DB_URI)
