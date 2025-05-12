@@ -1,2 +1,2 @@
 ESTE É O NOSSO README PARA O TRABALHO PRÁTICO DE PROGRAMAÇÃO WEB 🤌
-![image](https://github.com/user-attachments/assets/92862473-3c92-4a21-8d59-f98267f2cba4)
+![image](https://github.com/user-attachments/assets/8202d0ff-f7a8-4f5b-a374-8a5223ad6abb)
