@@ -2,6 +2,8 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 
+const JWT_SECRET = process.env.JWT_SECRET || 'segredo123'; // Valor padrão
+
 module.exports = function(User) {
   // Rota de login
   router.post('/login', async (req, res) => {
@@ -27,7 +29,7 @@ module.exports = function(User) {
       // Gerar token JWT
       const token = jwt.sign(
         { id: user._id, role: user.role },
-        process.env.JWT_SECRET,
+        JWT_SECRET,
         { expiresIn: '1h' }
       );
 
@@ -41,18 +43,18 @@ module.exports = function(User) {
     }
   });
 
-  // Middleware de autorização
+  // Middleware de autorização (pode aceitar qualquer usuário ou só alguns roles)
   const authorize = (roles = []) => {
     return (req, res, next) => {
-      const token = req.headers.authorization?.split(' ')[1]; // Espera "Bearer <token>"
+      const token = req.headers.authorization?.split(' ')[1]; // "Bearer <token>"
 
       if (!token) {
         return res.status(401).json({ message: 'Token não fornecido.' });
       }
 
       try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded; // Adiciona id e role ao req
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
 
         if (roles.length && !roles.includes(decoded.role)) {
           return res.status(403).json({ message: 'Acesso não autorizado.' });
@@ -65,9 +67,9 @@ module.exports = function(User) {
     };
   };
 
-  // Exemplo de rota protegida
-  router.get('/protected', authorize(['admin']), (req, res) => {
-    res.json({ message: `Acesso permitido para ${req.user.role} com ID ${req.user.id}` });
+  // Rota protegida para qualquer usuário autenticado
+  router.get('/protected', authorize(), (req, res) => {
+    res.json({ message: `Acesso permitido. Bem-vindo(a), ${req.user.role}!` });
   });
 
   return router;
