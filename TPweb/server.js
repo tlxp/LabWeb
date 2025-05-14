@@ -3,20 +3,28 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const path = require('path');
 const authRoutes = require('./auth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DB_URI = process.env.DB_URI;
 
-// Middleware
-app.use(cors({ origin: 'http://127.0.0.1:5500', credentials: true }));
+// CORS config
+const corsOptions = {
+  origin: ['http://127.0.0.1:5500', 'http://localhost:5500'],
+  credentials: true
+};
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
-// Conectar ao MongoDB com Mongoose
+// Servir arquivos estáticos da pasta "public"
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Conectar ao MongoDB
 mongoose.connect(DB_URI)
   .then(() => {
-    console.log('Conectado ao MongoDB Atlas com Mongoose');
+    console.log('✅ Conectado ao MongoDB Atlas com Mongoose');
 
     // Definir schema e modelo para usuários
     const userSchema = new mongoose.Schema({
@@ -26,19 +34,19 @@ mongoose.connect(DB_URI)
     });
     const User = mongoose.model('User', userSchema);
 
-    // Usar rotas de auth.js, passando o modelo User
+    // Rotas de autenticação
     app.use('/auth', authRoutes(User));
 
-    // Iniciar o servidor
+    // Iniciar servidor
     app.listen(PORT, () => {
-      console.log(`Servidor a correr em http://localhost:${PORT}`);
+      console.log(`🚀 Servidor a correr em: http://localhost:${PORT}`);
     });
   })
   .catch(err => {
-    console.error('Erro ao conectar ao MongoDB Atlas:', err);
+    console.error('❌ Erro ao conectar ao MongoDB Atlas:', err.message);
   });
 
-// Manipular encerramento da conexão
+// Encerramento
 mongoose.connection.on('disconnected', () => {
-  console.log('Conexão com MongoDB encerrada.');
+  console.log('🛑 Conexão com MongoDB encerrada.');
 });
