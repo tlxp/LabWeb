@@ -1,43 +1,74 @@
-require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-const authRoutes = require('./auth');
+const jwt = require('jsonwebtoken');
+const router = express.Router();
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-const DB_URI = process.env.DB_URI;
+module.exports = function(User) {
+  // Rota de login
+  router.post('/login', async (req, res) => {
+    const { username, password } = req.body;
 
-// Middleware
-app.use(cors());
-app.use(bodyParser.json());
+    if (!username || !password) {
+      return res.status(400).json({ message: 'Usuário e senha são obrigatórios.' });
+    }
 
-// Conectar ao MongoDB com Mongoose
-mongoose.connect(DB_URI)
-  .then(() => {
-    console.log('Conectado ao MongoDB Atlas com Mongoose');
+    console.log(`Buscando usuário: ${username}`);
+    try {
+      const user = await User.findOne({ username });
+      console.log(`Usuário encontrado: ${JSON.stringify(user)}`);
 
-    // Definir schema e modelo para usuários
-    const userSchema = new mongoose.Schema({
-      username: { type: String, required: true },
-      password: { type: String, required: true }
-    });
-    const User = mongoose.model('User', userSchema);
+      if (!user) {
+        return res.status(401).json({ message: 'Usuário não encontrado.' });
+      }
 
-    // Usar rotas de auth.js, passando o modelo User
-    app.use('/auth', authRoutes(User));
+      if (user.password !== password) {
+        return res.status(401).json({ message: 'Credenciais inválidas.' });
+      }
 
-    // Iniciar o servidor
-    app.listen(PORT, () => {
-      console.log(`Servidor a correr em http://localhost:${PORT}`);
-    });
-  })
-  .catch(err => {
-    console.error('Erro ao conectar ao MongoDB Atlas:', err);
+      // Gerar token JWT
+      const token = jwt.sign(
+        { id: user._id, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+
+      return res.json({
+        message: `Login bem-sucedido. Bem-vindo, ${username}!`,
+        token
+      });
+    } catch (err) {
+      console.error('Erro ao buscar usuário:', err);
+      return res.status(500).json({ message: 'Erro interno do servidor.' });
+    }
   });
 
-// Manipular encerramento da conexão
-mongoose.connection.on('disconnected', () => {
-  console.log('Conexão com MongoDB encerrada.');
-});
+  // Middleware de autorização
+  const authorize = (roles = []) => {
+    return (req, res, next) => {
+      const token = req.headers.authorization?.split(' ')[1]; // Espera "Bearer <token>"
+
+      if (!token) {
+        return res.status(401).json({ message: 'Token não fornecido.' });
+      }
+
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded; // Adiciona id e role ao req
+
+        if (roles.length && !roles.includes(decoded.role)) {
+          return res.status(403).json({ message: 'Acesso não autorizado.' });
+        }
+
+        next();
+      } catch (err) {
+        return res.status(401).json({ message: 'Token inválido.' });
+      }
+    };
+  };
+
+  // Exemplo de rota protegida
+  router.get('/protected', authorize(['admin']), (req, res) => {
+    res.json({ message: `Acesso permitido para ${req.user.role} com ID ${req.user.id}` });
+  });
+
+  return router;
+};
