@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 const DB_URI = process.env.DB_URI;
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: 'http://127.0.0.1:5500', credentials: true }));
 app.use(bodyParser.json());
 
 // Conectar ao MongoDB com Mongoose
@@ -20,8 +20,9 @@ mongoose.connect(DB_URI)
 
     // Definir schema e modelo para usuários
     const userSchema = new mongoose.Schema({
-      username: { type: String, required: true },
-      password: { type: String, required: true }
+      username: { type: String, required: true, unique: true },
+      password: { type: String, required: true },
+      role: { type: String, required: true, enum: ['admin', 'user'] }
     });
     const User = mongoose.model('User', userSchema);
 
