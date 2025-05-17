@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Certificados - Técnico</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="mobile-header">
+    <div class="burger" onclick="toggleSidebar()">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h3>Energia Solar</h3>
+    </div>
+    <button class="user-button">Técnico</button>
+    <nav class="sidebar-nav">
+      <ul>
+        <li><a href="technician.html">Registo de Certificados</a></li>
+      </ul>
+    </nav>
+    <button class="logout-button" onclick="logout()">Sair</button>
+  </div>
+
+  <div class="main-content">
+    <section id="technician-section">
+      <h2>Registo de Certificados</h2>
+      <form id="search-panel-form">
+        <label for="search-query">Pesquisar por ID do Painel ou Nome do Cliente</label>
+        <input type="text" id="search-query" name="search-query" required>
+        <button type="submit">Pesquisar</button>
+      </form>
+      <div id="search-results"></div>
+      <form id="certificate-form" class="hidden">
+        <input type="hidden" id="panel-id" name="panel-id">
+        <label for="certificate">Upload do Certificado (PDF)</label>
+        <input type="file" id="certificate" name="certificate" accept=".pdf" required>
+        <button type="submit">Submeter Certificado</button>
+      </form>
+    </section>
+  </div>
+
+  <footer>© 2025 Gestão de Energia Renovável. Todos os direitos reservados.</footer>
+  <script src="technician.js"></script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3>Energia Solar</h3>
+        </div>
+        <button class="user-button" id="user-button" onclick="showSection('profile-section')">Zé Teste - Cliente</button>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="#" onclick="showSection('monitor-section')">Monitorização da Produção</a></li>
+                <li><a href="#" onclick="showSection('register-section')">Registo de Painéis Solares</a></li>
+                <li><a href="#" onclick="showSection('credits-section')">Créditos de Energia</a></li>
+            </ul>
+        </nav>
+        <button class="logout-button" onclick="logout()">Sair</button>
+    </div>
+
+    <div class="mobile-header">
+        <div class="burger" onclick="toggleSidebar()">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="section" id="monitor-section">
+            <h2>Monitorização da Produção</h2>
+            <div class="monitor-container">
+                <div class="card">
+                    <h3>Produção em Tempo Real</h3>
+                    <p>0 kW</p>
+                </div>
+                <div class="card">
+                    <h3>Histórico Mensal</h3>
+                    <p>0 kWh</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section hidden" id="register-section">
+            <h2>Registo de Painéis Solares</h2>
+            <form class="register-form">
+                <label for="panel-id">ID do Painel</label>
+                <input type="text" id="panel-id" name="panel-id">
+                <label for="location">Localização</label>
+                <input type="text" id="location" name="location">
+                <label for="specs">Especificações Técnicas</label>
+                <textarea id="specs" name="specs"></textarea>
+                <button type="submit">Submeter Registo</button>
+            </form>
+        </div>
+
+        <div class="section hidden" id="credits-section">
+            <h2>Créditos de Energia</h2>
+            <div class="credits-container">
+                <div class="card">
+                    <h3>Créditos Acumulados</h3>
+                    <p>0 kWh</p>
+                </div>
+                <div class="card">
+                    <h3>Última Leitura</h3>
+                    <p>0 kWh (01/05/2025)</p>
+                </div>
+            </div>
+            <button class="email-button">Enviar Relatório por E-mail</button>
+        </div>
+
+        <div class="section hidden" id="profile-section">
+            <h2>Perfil do Utilizador</h2>
+            <div class="profile-section">
+                <div class="profile-header">
+                    <img src="" id="profile-img" class="profile-img" alt="Foto de Perfil">
+                    <div class="profile-info">
+                        <h3 id="profile-name">Zé Teste</h3>
+                        <p class="profile-dob" id="profile-dob">01/01/1990</p>
+                        <p class="profile-gender" id="profile-gender">Masculino</p>
+                    </div>
+                </div>
+                <div class="profile-description">
+                    <strong>Descrição:</strong>
+                    <p id="profile-description">Zé Teste é um cliente dedicado à produção de energia renovável, utilizando painéis solares para contribuir para um futuro sustentável.</p>
+                </div>
+                <a href="edit_profile.html"><button>Editar Perfil</button></a>
+                <button onclick="closeProfile()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        © 2025 Gestão de Energia Renovável. Todos os direitos reservados.
+    </footer>
+
+    <script>
+        // Load profile data from localStorage
+        document.addEventListener('DOMContentLoaded', () => {
+            const profile = JSON.parse(localStorage.getItem('userProfile')) || {};
+            document.getElementById('user-button').textContent = profile.name ? `${profile.name} - Cliente` : 'Zé Teste - Cliente';
+            document.getElementById('profile-name').textContent = profile.name || 'Zé Teste';
+            document.getElementById('profile-dob').textContent = profile.dob || '01/01/1990';
+            document.getElementById('profile-gender').textContent = profile.gender || 'Masculino';
+            document.getElementById('profile-description').textContent = profile.description || 'Zé Teste é um cliente dedicado à produção de energia renovável, utilizando painéis solares para contribuir para um futuro sustentável.';
+            document.getElementById('profile-img').src = profile.profilePic || '';
+        });
+
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('sidebar-active');
+            document.querySelector('.burger').classList.toggle('toggle');
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => section.classList.add('hidden'));
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+
+        function closeProfile() {
+            document.getElementById('profile-section').classList.add('hidden');
+        }
+
+        function logout() {
+            localStorage.removeItem('userProfile');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
