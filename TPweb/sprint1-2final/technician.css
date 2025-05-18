@@ -1,0 +1,55 @@
+/* Estilos específicos para a página do técnico */
+#search-results {
+  margin-top: 1rem;
+}
+
+#search-results .card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.select-button {
+  padding: 0.5rem 1rem;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.select-button:hover {
+  background-color: #2980b9;
+}
+
+#panel-details .card {
+  padding: 1.5rem;
+}
+
+#panel-details p {
+  margin: 0.5rem 0;
+}
+
+#panel-details button {
+  margin-top: 1rem;
+  margin-right: 0.5rem;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Ajustes para mobile */
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: 4rem;
+  }
+  
+  #panel-details .card, #search-results .card {
+    padding: 1rem;
+  }
+}
